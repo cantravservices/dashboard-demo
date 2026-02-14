@@ -646,63 +646,15 @@ function renderMoMComparison(){
   document.getElementById("mom-table").innerHTML='<h3>'+y1+' Monthly Status Breakdown</h3>'+statusBreakdownTable(ad,y1)+'<h3 style="margin-top:20px">'+y2+' Monthly Status Breakdown</h3>'+statusBreakdownTable(ad,y2);
 }
 
-// === PASSWORD GATE ===
-const ACCESS_CODE = "cantrav2026";
-
-// === HARDCODED GOOGLE SHEETS URL ===
-const GSHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRsUh22Nyxr7WBJv1FsvT2dWrKecDK907MCe1zyyYJcgo6WoDxB3TlbTW9sX90no9uSjI-co8CFVlP1/pub?output=csv";
-
 function initDashboard(){
   if(GSHEET_URL){
     loadFromGS(GSHEET_URL);
     const urlInput=document.getElementById("gs-url");
     if(urlInput)urlInput.value=GSHEET_URL;
-  } else {
-    renderAllTabs();
   }
-}
 
-(function(){
-  // Check if already authenticated this session
-  try{ if(sessionStorage.getItem("cantrav_auth")==="1"){ initDashboard(); return; } }catch(e){}
-  
-  // Show password gate
-  var overlay = document.createElement("div");
-  overlay.id = "pw-gate";
-  overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:#0A2636;display:flex;align-items:center;justify-content:center;z-index:99999;";
-  
-  var box = document.createElement("div");
-  box.style.cssText = "background:#fff;border-radius:16px;padding:44px 40px;max-width:420px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.3);";
-  
-  box.innerHTML = '<h2 style="font-family:Georgia,serif;color:#0A2636;font-size:19px;margin-bottom:6px">Cantrav Financial Dashboard</h2>'
-    + '<p style="font-size:12px;color:#A2A2A2;margin-bottom:22px">Enter the access code to continue</p>'
-    + '<p id="pw-err" style="color:#D23931;font-size:12px;margin-bottom:10px;display:none">Incorrect password. Please try again.</p>'
-    + '<input type="password" id="pw-input" placeholder="Access Code" style="width:100%;padding:12px 16px;border:1px solid #ddd;border-radius:8px;font-size:14px;text-align:center;margin-bottom:14px;letter-spacing:1px;outline:none;box-sizing:border-box;">'
-    + '<button id="pw-btn" style="width:100%;padding:13px;border:none;border-radius:8px;background:#D23931;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Enter Dashboard</button>';
-  
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-  
-  var inp = document.getElementById("pw-input");
-  var btn = document.getElementById("pw-btn");
-  var err = document.getElementById("pw-err");
-  
-  function tryLogin(){
-    if(inp.value === ACCESS_CODE){
-      overlay.remove();
-      try{ sessionStorage.setItem("cantrav_auth","1"); }catch(e){}
-      initDashboard();
-    } else {
-      err.style.display = "block";
-      inp.value = "";
-      inp.focus();
-    }
-  }
-  
-  btn.addEventListener("click", tryLogin);
-  inp.addEventListener("keydown", function(e){ if(e.key==="Enter") tryLogin(); });
-  inp.focus();
-})();
+// Initialize dashboard directly
+initDashboard();
 </script>
 </body>
 </html>
