@@ -646,12 +646,18 @@ function renderMoMComparison(){
   document.getElementById("mom-table").innerHTML='<h3>'+y1+' Monthly Status Breakdown</h3>'+statusBreakdownTable(ad,y1)+'<h3 style="margin-top:20px">'+y2+' Monthly Status Breakdown</h3>'+statusBreakdownTable(ad,y2);
 }
 
+// === HARDCODED GOOGLE SHEETS URL ===
+const GSHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRsUh22Nyxr7WBJv1FsvT2dWrKecDK907MCe1zyyYJcgo6WoDxB3TlbTW9sX90no9uSjI-co8CFVlP1/pub?output=csv";
+
 function initDashboard(){
   if(GSHEET_URL){
     loadFromGS(GSHEET_URL);
     const urlInput=document.getElementById("gs-url");
     if(urlInput)urlInput.value=GSHEET_URL;
+  } else {
+    renderAllTabs();
   }
+}
 
 // Initialize dashboard directly
 initDashboard();
