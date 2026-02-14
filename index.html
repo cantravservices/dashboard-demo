@@ -227,14 +227,7 @@ function addTargetYear(){
 
 // Load targets from a second Google Sheet tab
 function loadTargetsFromGS(baseUrl){
-  // The targets tab URL: replace gid or add gid for second sheet
-  // Published CSV for a specific sheet tab uses &gid=XXXX
-  // Try fetching with sheet name "Targets"
   let tUrl=baseUrl;
-  // If URL has gid= parameter, replace it; otherwise we need the Targets tab
-  // Easiest: publish each tab separately and provide both URLs
-  // OR: use a convention - targets sheet published as a second URL
-  // For simplicity: try to fetch from same spreadsheet but with &sheet=Targets
   if(tUrl.includes("/pub?")){
     tUrl=tUrl.replace(/&gid=\d+/,"").replace("pub?","pub?sheet=Targets&");
   } else if(tUrl.includes("/pub")){
@@ -257,6 +250,45 @@ function loadTargetsFromGS(baseUrl){
       }
     })
     .catch(()=>{console.log("No Targets tab found in Google Sheet - using defaults/local");});
+}
+
+// === GOOGLE SHEETS FUNCTIONS ===
+function saveAndLoadGS(){
+  const url=document.getElementById("gs-url").value.trim();
+  if(!url){showGSStatus("Please enter a URL.","#fff3cd","#856404");return;}
+  let fetchUrl=url;
+  if(!fetchUrl.includes("output=csv")){
+    if(fetchUrl.includes("?")){fetchUrl+="&output=csv";}
+    else{fetchUrl+="?output=csv";}
+  }
+  try{localStorage.setItem("cantrav_gs_url",fetchUrl);}catch(e){}
+  loadFromGS(fetchUrl);
+}
+
+function loadFromGS(url){
+  showGSStatus("Loading data from Google Sheets...","#e3f2fd","#1565c0");
+  fetch(url)
+    .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.text();})
+    .then(text=>{
+      const res=Papa.parse(text,{header:true,skipEmptyLines:true,dynamicTyping:true});
+      const parsed=res.data.map(parseRow).filter(d=>d.pn||d.ev);
+      if(!parsed.length){showGSStatus("No valid data found. Check that the sheet has the correct Viper column headers.","#fff3cd","#856404");return;}
+      allData=parsed;
+      populateFilters();
+      applyFilters();
+      showGSStatus("Successfully loaded "+parsed.length+" programs from Google Sheets.","#e8f5e9","#2e7d32");
+      loadTargetsFromGS(url);
+      renderTargetEditor();
+      switchTab(0);
+    })
+    .catch(err=>{
+      showGSStatus("Error loading: "+err.message+". Check the URL and make sure the sheet is published.","#ffebee","#c62828");
+    });
+}
+
+function showGSStatus(msg,bg,color){
+  const el=document.getElementById("gs-status");
+  if(el){el.style.display="block";el.style.background=bg;el.style.color=color;el.innerHTML=msg;}
 }
 
 function classify(s){if(["Final Invoice","Post Mortem"].includes(s))return"realized";if(s==="Sold")return"confirmed";if(s==="Prelim")return"preliminary";return"other";}
